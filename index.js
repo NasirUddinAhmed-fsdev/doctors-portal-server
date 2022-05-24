@@ -34,7 +34,6 @@ function verifyJWT(req, res, next) {
 async function run() {
   try {
     await client.connect();
-    console.log("database connected");
     const serviceCollection = client
       .db("doctors-portal")
       .collection("services");
@@ -100,7 +99,7 @@ async function run() {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "1h" }
       );
-      res.send(result, token);
+      res.send({ result, token });
     });
 
     // ! Warning:
@@ -112,7 +111,7 @@ async function run() {
       // step 1: get all services
       const services = await serviceCollection.find().toArray();
 
-      // step 2: get the booking of that day
+      // step 2: get the booking of that day. output: [{}, {}, {}, {}, {}, {}]
       const query = { date: date };
       const bookings = await bookingCollection.find(query).toArray();
 
@@ -141,7 +140,7 @@ async function run() {
       if (patient === decodedEmail) {
         const query = { patient: patient };
         const bookings = await bookingCollection.find(query).toArray();
-        res.send(bookings);
+        return res.send(bookings);
       } else {
         return res.status(403).send({ message: "Forbidden Access" });
       }
